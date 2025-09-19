@@ -1,0 +1,15 @@
+{
+  "manifest_version": 3,
+  "name": "ChatKit Omnibox",
+  "description": "Chat with ChatKit API directly from Chrome.",
+  "version": "1.1",
+  "permissions": ["storage"],
+  "host_permissions": ["https://api.gpt-oss.com/*"],
+  "omnibox": { "keyword": "gpt" },
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "background": {
+    "service_worker": "background.js"
+  }
+}

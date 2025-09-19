@@ -4,7 +4,7 @@ chrome.omnibox.onInputEntered.addListener(async (text) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
-        // "Authorization": "Bearer YOUR_KEY"  <-- add if required
+        // "Authorization": "Bearer YOUR_KEY" // add this if API needs a key
       },
       body: JSON.stringify({
         messages: [{ role: "user", content: text }]
@@ -18,10 +18,10 @@ chrome.omnibox.onInputEntered.addListener(async (text) => {
       const data = await res.json();
       reply = data?.choices?.[0]?.message?.content || JSON.stringify(data, null, 2);
     } else {
-      reply = await res.text(); // fallback if server returns plain text
+      reply = await res.text(); // fallback if plain text or error
     }
 
-    // Open a tab showing the reply
+    // Encode safely for data URL
     const html = `
       <html>
         <body style="font-family:sans-serif; padding:20px;">
@@ -31,13 +31,12 @@ chrome.omnibox.onInputEntered.addListener(async (text) => {
           <pre>${reply}</pre>
         </body>
       </html>`;
-    const blob = new Blob([html], { type: "text/html" });
-    const url = URL.createObjectURL(blob);
+    const dataUrl = "data:text/html;charset=utf-8," + encodeURIComponent(html);
 
-    chrome.tabs.create({ url });
+    chrome.tabs.create({ url: dataUrl });
   } catch (err) {
     chrome.tabs.create({
-      url: "data:text/html,<h1>Error</h1><pre>" + err.message + "</pre>"
+      url: "data:text/html,<h1>Error</h1><pre>" + encodeURIComponent(err.message) + "</pre>"
     });
   }
 });

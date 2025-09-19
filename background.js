@@ -1,19 +1,25 @@
 chrome.omnibox.onInputEntered.addListener(async (text) => {
-  // Query the API
   try {
     const res = await fetch("https://api.gpt-oss.com/chatkit/", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
-        // Add "Authorization": "Bearer YOUR_KEY" if needed
+        // "Authorization": "Bearer YOUR_KEY"  <-- add if required
       },
       body: JSON.stringify({
         messages: [{ role: "user", content: text }]
       })
     });
 
-    const data = await res.json();
-    const reply = data?.choices?.[0]?.message?.content || JSON.stringify(data, null, 2);
+    let reply;
+    const contentType = res.headers.get("content-type") || "";
+
+    if (contentType.includes("application/json")) {
+      const data = await res.json();
+      reply = data?.choices?.[0]?.message?.content || JSON.stringify(data, null, 2);
+    } else {
+      reply = await res.text(); // fallback if server returns plain text
+    }
 
     // Open a tab showing the reply
     const html = `
